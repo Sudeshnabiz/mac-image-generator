@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ms-aichain="http://www.mulesoft.org/schema/mule/ms-aichain"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ms-aichain http://www.mulesoft.org/schema/mule/ms-aichain/current/mule-ms-aichain.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<ms-aichain:config name="MuleSoft_AI_Chain_Config" llmType="OPENAI" configType="Configuration Json" modelName="gpt-4o-mini" doc:name="MuleSoft AI Chain Config" doc:id="3b0f6b99-4a43-436f-ab94-02f01144b92d" filePath='#[mule.home ++ "/apps/" ++ app.name ++ "/envVars.json"]'/>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="28f3caa9-263a-4416-930a-fc8209debb80" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="mulechainaiFlow" doc:id="6bbb07b2-4eb9-4ed9-8be2-180392eda333" >
+		<http:listener doc:name="Listener" doc:id="ff62edaa-7bd7-4f3c-a288-f422f4dac6d9" config-ref="HTTP_Listener_config" path="/test"/>
+		<ms-aichain:image-read-scanned-documents doc:name="Image read scanned documents" doc:id="c4b5d070-e21d-4d90-b8fa-9b0a4cccbf61" config-ref="MuleSoft_AI_Chain_Config" filePath='#["/Users/sudeshna.biswas/Desktop/Workspace/hr-assistant/src/main/resources/Profile.pdf"]'/>
+	</flow>
+	<flow name="mulechainaiFlow1" doc:id="0ae33dd9-abb4-44dc-aae4-3f43f7783281" >
+		<http:listener doc:name="Listener" doc:id="5df4cc46-8b21-4ad6-8eab-c9e1af1f045e" config-ref="HTTP_Listener_config" path="/generate"/>
+		<ms-aichain:image-generate doc:name="Image generate" doc:id="a98402ba-d306-4ec5-82fa-91595702b7fc" config-ref="MuleSoft_AI_Chain_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="95951e8f-6e32-4042-bb50-521da8bce457" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
